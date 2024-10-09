@@ -17,8 +17,13 @@ import type {PolymorpheusContent} from '@taiga-ui/polymorpheus';
 import {PolymorpheusOutlet} from '@taiga-ui/polymorpheus';
 import {distinctUntilChanged, map, startWith, Subject} from 'rxjs';
 
-import type {TuiTreeController, TuiTreeItemContext} from '../../misc/tree.interfaces';
+import type {
+    TuiTreeAccessor,
+    TuiTreeController,
+    TuiTreeItemContext,
+} from '../../misc/tree.interfaces';
 import {
+    TUI_TREE_ACCESSOR,
     TUI_TREE_CONTENT,
     TUI_TREE_CONTROLLER,
     TUI_TREE_LEVEL,
@@ -55,6 +60,10 @@ export class TuiTreeItem implements DoCheck {
         forwardRef(() => TUI_TREE_CONTROLLER),
     );
 
+    private readonly accessor = inject<TuiTreeAccessor<unknown>>(
+        forwardRef(() => TUI_TREE_ACCESSOR),
+    );
+
     private readonly change$ = new Subject<void>();
 
     protected readonly level = inject<number>(forwardRef(() => TUI_TREE_LEVEL));
@@ -80,7 +89,11 @@ export class TuiTreeItem implements DoCheck {
     );
 
     public get isExpandable(): boolean {
-        return !!this.nested.length;
+        const parent = this.accessor.getParent(this);
+
+        return !!this.nested.length && (parent ? parent.isExpanded : true);
+
+        // return !!this.nested.length;
     }
 
     public get isExpanded(): boolean {

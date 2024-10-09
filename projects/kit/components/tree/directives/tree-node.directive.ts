@@ -17,7 +17,9 @@ export class TuiTreeNode<T> implements OnDestroy {
 
     @Input('tuiTreeNode')
     public set value(value: T) {
-        this.directive?.register(this.component, value);
+        const parent = this.directive?.getParent(this.component);
+
+        this.directive?.register(this.component, value, parent);
     }
 
     public ngOnDestroy(): void {

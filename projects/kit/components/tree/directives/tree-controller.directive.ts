@@ -28,8 +28,8 @@ export class TuiTreeControllerDirective<T>
     @Output()
     public readonly toggled = new EventEmitter<T>();
 
-    public register(item: TuiTreeItem, value: T): void {
-        this.items.set(item, value);
+    public register(item: TuiTreeItem, value: T, parent: TuiTreeItem): void {
+        this.items.set(item, {value, parent: parent || null} as T);
     }
 
     public unregister(item: TuiTreeItem): void {
@@ -52,5 +52,9 @@ export class TuiTreeControllerDirective<T>
 
         this.toggled.emit(value);
         this.map.set(value, !expanded);
+    }
+
+    public getParent(item: TuiTreeItem): TuiTreeItem | null {
+        return (this.items.get(item) as any)?.parent || null;
     }
 }

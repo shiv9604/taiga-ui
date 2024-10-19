@@ -1,10 +1,18 @@
-import type {AfterViewChecked, ComponentRef, OnChanges, OnDestroy} from '@angular/core';
+import type {
+    AfterViewChecked,
+    ComponentRef,
+    OnChanges,
+    OnDestroy,
+    OnInit,
+} from '@angular/core';
 import {
     ChangeDetectorRef,
     Directive,
+    EventEmitter,
     inject,
     INJECTOR,
     Input,
+    Output,
     signal,
     TemplateRef,
 } from '@angular/core';
@@ -15,11 +23,11 @@ import {tuiInjectElement} from '@taiga-ui/cdk/utils/dom';
 import {tuiPure} from '@taiga-ui/cdk/utils/miscellaneous';
 import type {TuiRectAccessor, TuiVehicle} from '@taiga-ui/core/classes';
 import {tuiAsRectAccessor, tuiAsVehicle} from '@taiga-ui/core/classes';
-import type {TuiPortalItem} from '@taiga-ui/core/types';
+import type {TuiPortalItem, TuiVerticalDirection} from '@taiga-ui/core/types';
 import {tuiCheckFixedPosition} from '@taiga-ui/core/utils';
 import type {PolymorpheusContent} from '@taiga-ui/polymorpheus';
 import {PolymorpheusComponent, PolymorpheusTemplate} from '@taiga-ui/polymorpheus';
-import {Subject, throttleTime} from 'rxjs';
+import {observeOn, Subject, throttleTime} from 'rxjs';
 
 import {TuiDropdownDriverDirective} from './dropdown.driver';
 import {TUI_DROPDOWN_COMPONENT} from './dropdown.providers';
@@ -38,6 +46,7 @@ import {TuiDropdownPosition} from './dropdown-position.directive';
 })
 export class TuiDropdownDirective
     implements
+        OnInit,
         AfterViewChecked,
         OnDestroy,
         OnChanges,
@@ -48,6 +57,7 @@ export class TuiDropdownDirective
     private readonly refresh$ = new Subject<void>();
     private readonly service = inject(TuiDropdownService);
     private readonly cdr = inject(ChangeDetectorRef);
+    private readonly dropdownService = inject(TuiDropdownService);
 
     protected readonly sub = this.refresh$
         .pipe(throttleTime(0, tuiZonefreeScheduler()), takeUntilDestroyed())
@@ -55,6 +65,9 @@ export class TuiDropdownDirective
             this.ref()?.changeDetectorRef.detectChanges();
             this.ref()?.changeDetectorRef.markForCheck();
         });
+
+    @Output()
+    public readonly tuiDropdownDirectionChange = new EventEmitter<TuiVerticalDirection>();
 
     public readonly el = tuiInjectElement();
     public readonly type = 'dropdown';
@@ -91,6 +104,18 @@ export class TuiDropdownDirective
 
     public ngOnDestroy(): void {
         this.toggle(false);
+    }
+
+    public ngOnInit(): void {
+        this.directionChangeObserver();
+    }
+
+    public directionChangeObserver(): void {
+        this.dropdownService.dropdownDirection$
+            .pipe(observeOn(tuiZonefreeScheduler()), takeUntilDestroyed())
+            .subscribe((direction: TuiVerticalDirection) => {
+                this.tuiDropdownDirectionChange.emit(direction);
+            });
     }
 
     public getClientRect(): DOMRect {

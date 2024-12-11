@@ -1,5 +1,5 @@
 <div>
-    <p class="tui-text_body-xl">NgModel</p>
+    <p class="demo-text_body-xl">NgModel</p>
 
     <input
         tuiLike="var(--tui-status-negative)"
@@ -7,11 +7,11 @@
         [(ngModel)]="liked"
     />
 
-    <p class="tui-text_body-m-2">Liked: {{ liked }}</p>
+    <p class="demo-text_body-m-2">Liked: {{ liked }}</p>
 </div>
 
 <div>
-    <p class="tui-text_body-xl">Reactive form</p>
+    <p class="demo-text_body-xl">Reactive form</p>
 
     <form [formGroup]="likeForm">
         <input
@@ -21,7 +21,7 @@
         />
     </form>
 
-    <p class="tui-text_body-m-2">Liked: {{ likeForm.value.liked }}</p>
+    <p class="demo-text_body-m-2">Liked: {{ likeForm.value.liked }}</p>
 </div>
 
 <button
